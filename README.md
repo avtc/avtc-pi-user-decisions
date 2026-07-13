@@ -121,7 +121,11 @@ Background mode (`captureMode: "background"`) keeps two best-effort trails for d
 
 Both are written only while a capture runs, so a no-decision session leaves no trace beyond the empty store.
 
-> Developed with [Z.ai](https://z.ai/subscribe?ic=N5IV4LLOOV) — get 10% off your subscription via this referral link.
+## Full suite
+
+Check out the full suite of related extensions, [avtc-pi](https://github.com/avtc/avtc-pi) — deterministic feature development, subagent delegation, working-memory, behavioral learning, parallel-work guardrails, durable decisions, notifications, and more.
+
+Developed with [Z.ai](https://z.ai/subscribe?ic=N5IV4LLOOV) — get 10% off your subscription via this referral link.
 
 ## License
 
