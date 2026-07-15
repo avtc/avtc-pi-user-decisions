@@ -1,9 +1,7 @@
 node_modules/
 dist/
 
-# Parallel worktrees created by avtc-pi-feature-flow extension
 .worktrees/
-.ff
 
-# pi runtime state (feature-flow session tracker etc.)
+# pi runtime state
 .pi
