@@ -10,7 +10,7 @@ vi.mock("@earendil-works/pi-agent-core", () => ({
   agentLoop: (...args: unknown[]) => agentLoopMock(...args),
 }));
 
-import type { Api, Model, ModelThinkingLevel } from "@earendil-works/pi-ai";
+import type { Api, Model, ModelThinkingLevel } from "@earendil-works/pi-ai/compat";
 import type { ModelRegistry } from "@earendil-works/pi-coding-agent";
 // Import AFTER mock is registered.
 import {

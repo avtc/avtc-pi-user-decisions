@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
-import type { ModelThinkingLevel } from "@earendil-works/pi-ai";
+import type { ModelThinkingLevel } from "@earendil-works/pi-ai/compat";
 
-export type { ModelThinkingLevel } from "@earendil-works/pi-ai";
+export type { ModelThinkingLevel } from "@earendil-works/pi-ai/compat";
 
 /** A stored decision record (same shape across all tiers). */
 export interface DecisionRecord {
