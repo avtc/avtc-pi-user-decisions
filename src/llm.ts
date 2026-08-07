@@ -7,6 +7,7 @@ import {
   type AgentMessage,
   type AgentTool,
   agentLoop,
+  type StreamFn,
 } from "@earendil-works/pi-agent-core";
 import type { Api, Message, Model, ModelThinkingLevel } from "@earendil-works/pi-ai/compat";
 import type { ModelRegistry } from "@earendil-works/pi-coding-agent";
@@ -139,11 +140,14 @@ export async function callLlmWithTool<T>(opts: CallLlmOptions<T>): Promise<T | n
     convertToLlm: (msgs: AgentMessage[]) => msgs as unknown as Message[],
     toolExecution: "sequential",
   };
+  // pi 0.84.1 made streamFn a required agentLoop arg; pass undefined (cast to
+  // StreamFn) so pi-agent-core falls back to the host-installed default streamFn.
   const stream = agentLoop(
     [{ role: "user", content: [{ type: "text", text: userText }], timestamp: Date.now() }],
     context,
     config,
     combined,
+    undefined as unknown as StreamFn,
   );
   // Read usage from the capture's OWN stream (mirrors portrait llm-call.ts:308). `message_update`
   // on the session emitter is the MAIN session's stream — a standalone agentLoop never forwards

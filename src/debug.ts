@@ -16,6 +16,10 @@ import * as path from "node:path";
 
 const DEBUG_DIR_NAME = "debug";
 
+/** Monotonic counter for same-millisecond dump ordering (deterministic prune order).
+ * Zero-padded so filename sort = creation order within a process. */
+let dumpCounter = 0;
+
 /** Ensure <parentDir>/debug exists and return its path. */
 function ensureDebugDir(parentDir: string): string {
   const dir = path.join(parentDir, DEBUG_DIR_NAME);
@@ -37,10 +41,17 @@ function ensureDebugDir(parentDir: string): string {
 export function openDebugDump(parentDir: string, prefix: string, limit: number): string {
   const dir = ensureDebugDir(parentDir);
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  // Filename = <prefix>-<isoTs>-<paddedCounter>-<nonce>.txt:
+  //  - isoTs: ms-resolution, human-readable, primary chronological sort key
+  //  - paddedCounter: process-monotonic, zero-padded → deterministic order for same-ms files
+  //    (fixes the same-millisecond tie: pruning sorts by filename, and a bare random nonce made
+  //    the oldest pick non-deterministic in a tight loop)
+  //  - nonce: short random → cross-process/restart collision safety
+  const seq = dumpCounter++;
   const nonce = Math.random().toString(16).slice(2, 8);
-  const dumpPath = path.join(dir, `${prefix}-${timestamp}-${nonce}.txt`);
-  // Prune oldest first by FILENAME (creation order — see the doc above). One readdir, no per-file
-  // statSync on the capture path.
+  const dumpPath = path.join(dir, `${prefix}-${timestamp}-${seq.toString().padStart(6, "0")}-${nonce}.txt`);
+  // Prune oldest first by FILENAME (creation order — see the doc above). The padded counter
+  // breaks same-ms ties deterministically. One readdir, no per-file statSync on the capture path.
   const existing = fs
     .readdirSync(dir)
     .filter((f) => f.startsWith(`${prefix}-`) && f.endsWith(".txt"))
