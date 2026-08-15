@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
+import { dirname } from "node:path";
 import type { ExtensionAPI, ExtensionCommandContext, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { runCapture, type UiDialog } from "./autocatch.js";
 import { isAskUserQuestionResult, isFirstEntryAskUserQuestion, lastAssistantText } from "./autocatch-hooks.js";
@@ -118,6 +119,12 @@ function buildRuntime(ctx: ExtensionContext): SessionRuntime | null {
   const sessionId = ctx.sessionManager.getSessionId();
   const activePath = resolveActivePath(ctx.cwd, sessionId);
   if (!activePath) return null; // subagent without env var → degraded
+  // The session's cwd can differ from the process start cwd (switchSession / resume
+  // into another project — e.g. a harness driving sessions in a scenario repo); the
+  // load-time bootstrap only creates the PROCESS cwd's store. Ensure THIS session's
+  // store dir exists (idempotent) so the lock DB + tier writes have a parent —
+  // otherwise every tool call fails lock-init with a misleading "store busy".
+  fs.mkdirSync(dirname(activePath), { recursive: true });
   const tiers = tierPaths(activePath, config.rankingEnabled);
   const lockState = makeLockState();
   const lockFilePath = lockDbPath(activePath);

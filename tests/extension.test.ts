@@ -297,6 +297,29 @@ describe("decisionsExtension factory — bootstrap", () => {
     decisionsExtension(pi);
     expect(fs.existsSync(sessionsPath())).toBe(true);
   });
+
+  it("creates the SESSION's sessions/ dir at session_start when its cwd differs from the process cwd", async () => {
+    // switchSession / resume into another project: the load-time bootstrap only
+    // mkdir'd the PROCESS cwd's store; a session in a different cwd previously had
+    // no store dir, so the lock DB open failed (CANTOPEN) and every user_decision_*
+    // surfaced a misleading "decisions store busy (lock unavailable)".
+    const other = fs.mkdtempSync(path.join(os.tmpdir(), "ud-othercwd-"));
+    try {
+      const { pi, handlers } = createMockPi();
+      decisionsExtension(pi);
+      const otherSessions = path.join(other, ".pi", "user-decisions", "sessions");
+      expect(fs.existsSync(otherSessions)).toBe(false); // process-cwd bootstrap did not touch it
+      await handlers.session_start?.({}, mockCtx(other, "s-other"));
+      expect(fs.existsSync(otherSessions)).toBe(true); // per-session bootstrap did
+      // The lock must actually be acquirable on the session's store path.
+      const { acquireUnderLock, makeLockState } = await import("../src/lock.js");
+      const lockPath = path.join(otherSessions, "s-other.lock.sqlite");
+      const result = await acquireUnderLock(makeLockState(), lockPath, async () => "ok");
+      expect(result).toBe("ok");
+    } finally {
+      fs.rmSync(other, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("session_start (root, mode=agent default) — tools + env var", () => {

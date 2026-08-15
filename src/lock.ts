@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
+import { log } from "./log.js";
 import { acquireSqliteMutex, type SqliteMutex } from "./snippets/vendored/sqlite-mutex.js";
 
 /**
@@ -42,7 +43,11 @@ export async function acquireUnderLock<T>(
   let mutex: SqliteMutex;
   try {
     mutex = await acquireSqliteMutex(lockDbPath, state.abort?.signal ?? null);
-  } catch {
+  } catch (err) {
+    // Distinguish the two failure classes in the log: an abort (shutdown) vs an
+    // acquisition/init fault (e.g. the lock DB could not be opened). The caller's
+    // tool error string stays generic; this line carries the diagnosable cause.
+    log.warn(`lock acquire failed (${lockDbPath}): ${err instanceof Error ? err.message : String(err)}`);
     return null; // aborted or failed to acquire — caller surfaces the error
   }
   state.mutex = mutex;
