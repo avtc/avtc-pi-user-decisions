@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-user-decisions",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Captures user decisions and re-injects them into the system prompt after compaction and into subagents, so the agent never forgets a decision you made.",
   "type": "module",
   "license": "MIT",
@@ -19,7 +19,7 @@
       "avtc-pi-logger",
       "avtc-pi-settings-ui"
     ],
-    "image": "https://raw.githubusercontent.com/avtc/avtc-pi-user-decisions/main/assets/images/tool-call-and-list-command.png"
+    "image": "https://raw.githubusercontent.com/avtc/avtc-pi-user-decisions/main/assets/images/cover.png"
   },
   "files": [
     "index.ts",
