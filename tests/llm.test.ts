@@ -176,7 +176,7 @@ describe("callLlmWithTool", () => {
     // apiKey/headers/model wired, convertToLlm + toolExecution, and the user-text payload.
     const callArgs = agentLoopMock.mock.calls[0] as unknown[];
     const messages = callArgs[0] as { role: string; content: { type: string; text: string }[] }[];
-    const context = callArgs[1] as { systemPrompt: string; tools: AgentTool[] };
+    const context = callArgs[1] as { messages: { role: string; content: string }[]; tools: AgentTool[] };
     const config = callArgs[2] as {
       model: Model<Api>;
       apiKey: string;
@@ -186,7 +186,8 @@ describe("callLlmWithTool", () => {
     };
     expect(messages[0]?.role).toBe("user");
     expect(messages[0]?.content[0]?.text).toBe("user text");
-    expect(context.systemPrompt).toBe("SYS");
+    // pi ≥0.87: the system prompt rides as the transcript's leading system message
+    expect(context.messages[0]).toMatchObject({ role: "system", content: "SYS" });
     expect(context.tools[0]).toBe(tool);
     expect(config.model).toBe(model);
     expect(config.apiKey).toBe("key");
