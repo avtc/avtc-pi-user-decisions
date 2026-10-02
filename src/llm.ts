@@ -130,7 +130,12 @@ export async function callLlmWithTool<T>(opts: CallLlmOptions<T>): Promise<T | n
   llmLog.info(`call start model=${model.id} timeout=${timeoutMs}ms maxTokens=${maxTokens} thinking=${thinkingLevel}`);
   const started = Date.now();
 
-  const context: AgentContext = { systemPrompt, messages: [], tools: [tool] };
+  // pi ≥0.87: AgentContext.systemPrompt was removed — the prompt rides as the
+  // transcript's leading system message instead.
+  const context: AgentContext = {
+    messages: [{ role: "system", content: systemPrompt, timestamp: Date.now() }],
+    tools: [tool],
+  };
   const config: AgentLoopConfig = {
     model,
     apiKey: auth.apiKey,
