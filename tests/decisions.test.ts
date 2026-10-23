@@ -2,17 +2,17 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { applyAdd, formatRecordLine } from "../src/decisions.js";
 import { readAllTiered, readTier, writeTier } from "../src/storage.js";
 import type { DecisionRecord, TierPaths } from "../src/types.js";
+import { tempDir } from "./temp-dir.js";
 
 let dir: string;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-decisions-"));
+  dir = tempDir("ud-decisions");
 });
 afterEach(() => {
   fs.rmSync(dir, { recursive: true, force: true });

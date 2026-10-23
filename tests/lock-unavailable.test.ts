@@ -6,13 +6,13 @@
 // and acquireUnderLock's blocking retry waits for the holder), so we mock the lock module to force
 // acquireUnderLock → null and assert the handler surfaces the error result (not a throw, not a hang).
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LockState } from "../src/lock.js";
 import type { ToolRuntime } from "../src/tools.js";
 import type { TierPaths } from "../src/types.js";
+import { tempDir } from "./temp-dir.js";
 
 // Mock the lock module so acquireUnderLock resolves null (simulates a contended/busy store).
 vi.mock("../src/lock.js", () => ({
@@ -24,7 +24,7 @@ vi.mock("../src/lock.js", () => ({
 let dir: string;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-lockbusy-"));
+  dir = tempDir("ud-lockbusy");
 });
 afterEach(() => {
   fs.rmSync(dir, { recursive: true, force: true });

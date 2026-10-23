@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -11,6 +10,7 @@ import { cleanupOnExit, makeLockState } from "../src/lock.js";
 import { writeTier } from "../src/storage.js";
 import { registerDecisionTools, type ToolRuntime } from "../src/tools.js";
 import type { DecisionRecord, TierPaths } from "../src/types.js";
+import { tempDir } from "./temp-dir.js";
 
 /** Decision storage: ranked mode */
 const RANKED_MODE = true;
@@ -22,7 +22,7 @@ let dir: string;
 let lockState: LockState;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-tools-"));
+  dir = tempDir("ud-tools");
   lockState = makeLockState();
 });
 afterEach(() => {

@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
@@ -18,6 +17,7 @@ import decisionsExtension from "../src/index.js";
 import { DECISIONS_SCHEMA } from "../src/schema.js";
 import { _resetGetDecisionsSettings, _setGetDecisionsSettings } from "../src/settings-ui.js";
 import type { DecisionsConfig } from "../src/types.js";
+import { tempDir } from "./temp-dir.js";
 
 /** Schema-derived defaults — the base config each test starts from. */
 function baseDecisionsConfig(): DecisionsConfig {
@@ -72,7 +72,7 @@ let dir: string;
 
 beforeEach(() => {
   savedCwd = process.cwd();
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-idem-"));
+  dir = tempDir("ud-idem");
   mockOs.homeDir = path.join(dir, "home");
   process.chdir(dir);
   // Each test starts from an unwired state — the guard short-circuits otherwise.

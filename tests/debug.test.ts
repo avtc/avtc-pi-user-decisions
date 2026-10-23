@@ -2,15 +2,15 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { appendDebug, openDebugDump } from "../src/debug.js";
+import { tempDir } from "./temp-dir.js";
 
 let dir: string;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-debug-"));
+  dir = tempDir("ud-debug");
 });
 afterEach(() => {
   fs.rmSync(dir, { recursive: true, force: true });

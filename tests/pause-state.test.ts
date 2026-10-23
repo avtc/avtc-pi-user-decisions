@@ -2,17 +2,17 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { EMPTY_PAUSE, PauseSignal, readPauseState, setPaused, writePauseState } from "../src/pause-state.js";
+import { tempDir } from "./temp-dir.js";
 
 describe("pause-state", () => {
   let dir: string;
   let activePath: string;
 
   beforeEach(() => {
-    dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-pause-"));
+    dir = tempDir("ud-pause");
     activePath = path.join(dir, "sess.jsonl");
   });
   afterEach(() => {

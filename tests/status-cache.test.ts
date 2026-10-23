@@ -8,13 +8,13 @@
 // import is fragile under the shared module cache (the spy is sometimes bypassed). Asserting on the
 // observable cache behavior (stale count on hit, fresh count on miss) is both stronger and order-proof.
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { countTotalActive, invalidateCountCache } from "../src/status.js";
 import { writeTier } from "../src/storage.js";
 import type { TierPaths } from "../src/types.js";
+import { tempDir } from "./temp-dir.js";
 
 let dir: string;
 let tp: TierPaths;
@@ -40,7 +40,7 @@ function forceMtime(filePath: string, mtimeMs: number): void {
 }
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-status-cache-"));
+  dir = tempDir("ud-status-cache");
   tp = {
     active: path.join(dir, "s.jsonl"),
     evicted: path.join(dir, "s.evicted.jsonl"),

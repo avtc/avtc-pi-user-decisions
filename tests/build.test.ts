@@ -2,19 +2,19 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { applyBuild, type Candidate } from "../src/build.js";
 import { applyInsert, readTierSnapshot } from "../src/decisions.js";
 import { readTier } from "../src/storage.js";
 import type { DecisionRecord, TierPaths } from "../src/types.js";
+import { tempDir } from "./temp-dir.js";
 
 let dir: string;
 let now: Date;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-build-"));
+  dir = tempDir("ud-build");
   now = new Date("2026-06-22T00:00:00Z");
 });
 afterEach(() => {

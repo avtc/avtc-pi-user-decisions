@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
-import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { describe, expect, it } from "vitest";
 import { acquireUnderLock, cleanupOnExit, makeLockState } from "../src/lock.js";
+import { tempDir } from "./temp-dir.js";
 
 function tmpLockDb(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lock-adapter-"));
+  const dir = tempDir("lock-adapter");
   return path.join(dir, "session.lock.sqlite");
 }
 
@@ -95,7 +95,8 @@ describe("acquireUnderLock — abort / failure returns null (never throws)", () 
   it("returns null (never throws) if the mutex acquire fails", async () => {
     const st = makeLockState();
     // An invalid path (directory as lock db) makes open fail → acquireUnderLock returns null
-    const bad = path.join(os.tmpdir(), "nonexistent-dir-xyz", "x.lock.sqlite");
+    // builds a deliberately-invalid path; nothing is ever created
+    const bad = path.join(os.tmpdir(), "nonexistent-dir-xyz", "x.lock.sqlite"); // raw-tmpdir: allow
     const res = await acquireUnderLock(st, bad, () => "should-not-run");
     expect(res).toBeNull();
     expect(st.held).toBe(false);

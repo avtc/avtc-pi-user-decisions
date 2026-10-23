@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import type { Api, Model } from "@earendil-works/pi-ai/compat";
 import type { ModelRegistry } from "@earendil-works/pi-coding-agent";
@@ -49,6 +48,7 @@ vi.mock("../src/pause-state.js", async (importOriginal) => {
 import { type AutoCatchDeps, runCapture } from "../src/autocatch.js";
 import { PauseSignal, readPauseState } from "../src/pause-state.js";
 import { readTier } from "../src/storage.js";
+import { tempDir } from "./temp-dir.js";
 
 let mockExtractResult: { action: "skip" | "add"; summary: string | null; detail: string | null } | null = null;
 let mockBuildResult: {
@@ -65,7 +65,7 @@ let lockState: LockState;
 let tp: TierPaths;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-autocatch-"));
+  dir = tempDir("ud-autocatch");
   const active = path.join(dir, "s.jsonl");
   tp = { active, evicted: path.join(dir, "s.evicted.jsonl"), dropped: path.join(dir, "s.dropped.jsonl") };
   lockState = makeLockState();

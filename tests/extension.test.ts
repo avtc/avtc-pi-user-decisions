@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -29,6 +28,7 @@ import { DECISIONS_SCHEMA } from "../src/schema.js";
 import { _resetGetDecisionsSettings, _setGetDecisionsSettings } from "../src/settings-ui.js";
 import { serializeRecord } from "../src/storage.js";
 import type { DecisionRecord, DecisionsConfig } from "../src/types.js";
+import { tempDir } from "./temp-dir.js";
 
 // --- test settings (mock pattern: drive getDecisionsSettings directly, no file/env ceremony) ---
 
@@ -258,7 +258,7 @@ beforeEach(() => {
   delete process.env.PI_SUBAGENT_PARENT_PID;
   delete process.env.PI_DECISIONS_SESSION_FILE;
   delete process.env.PI_SUBAGENT_TOOLS_ADD;
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-ext-"));
+  dir = tempDir("ud-ext");
   // Isolate from the user's real home (defensive — other code may call os.homedir).
   mockOs.homeDir = path.join(dir, "home");
   process.chdir(dir);
@@ -303,7 +303,7 @@ describe("decisionsExtension factory — bootstrap", () => {
     // mkdir'd the PROCESS cwd's store; a session in a different cwd previously had
     // no store dir, so the lock DB open failed (CANTOPEN) and every user_decision_*
     // surfaced a misleading "decisions store busy (lock unavailable)".
-    const other = fs.mkdtempSync(path.join(os.tmpdir(), "ud-othercwd-"));
+    const other = tempDir("ud-othercwd");
     try {
       const { pi, handlers } = createMockPi();
       decisionsExtension(pi);

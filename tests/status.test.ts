@@ -2,18 +2,18 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { countTotalActive, invalidateCountCache, renderStatus, snapshot } from "../src/status.js";
 import { writeTier } from "../src/storage.js";
 import type { DecisionRecord, DecisionsConfig, TierPaths } from "../src/types.js";
+import { tempDir } from "./temp-dir.js";
 
 let dir: string;
 let tp: TierPaths;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), "ud-status-"));
+  dir = tempDir("ud-status");
   const active = path.join(dir, "s.jsonl");
   tp = { active, evicted: path.join(dir, "s.evicted.jsonl"), dropped: path.join(dir, "s.dropped.jsonl") };
   invalidateCountCache(); // isolate mtime-cache state between tests
