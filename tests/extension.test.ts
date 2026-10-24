@@ -54,7 +54,10 @@ interface RegisteredCommand {
 interface Handlers {
   session_start?: (event: unknown, ctx: ExtensionContext) => unknown;
   session_compact?: (event: unknown, ctx: ExtensionContext) => unknown;
-  before_agent_start?: (event: { prompt?: string; systemPrompt?: string }, ctx: ExtensionContext) => unknown;
+  before_agent_start?: (
+    event: { prompt?: string; systemPrompt?: string; messageType?: "user" | "custom"; message?: unknown },
+    ctx: ExtensionContext,
+  ) => unknown;
   session_shutdown?: (event: unknown, ctx: ExtensionContext) => unknown;
   tool_result?: (event: unknown, ctx: ExtensionContext) => unknown;
   input?: (event: { source?: string; text?: string; streamingBehavior?: string }, ctx: ExtensionContext) => unknown;
@@ -377,6 +380,42 @@ describe("before_agent_start — inject cache", () => {
     expect(result.systemPrompt).toContain("BASE");
     expect(result.systemPrompt).toContain("## User Decisions (this session)");
     expect(result.systemPrompt).toContain("- 1 Use jsonl");
+  });
+});
+
+describe("before_agent_start — union narrowing (pi >= 1.2.0 sendMessage-triggered runs)", () => {
+  // pi 1.2.0+ fires before_agent_start for BOTH user prompts and custom-message runs started
+  // by pi.sendMessage(..., { triggerTurn: true }); the event is a union and `prompt` exists
+  // only on the "user" branch. The handler must skip custom runs instead of reading .prompt.
+  it("user-shape event (messageType 'user' + prompt) → capture enqueued with the prompt", async () => {
+    writeModeSettings("background");
+    const { pi, handlers } = createMockPi();
+    decisionsExtension(pi);
+    await handlers.session_start?.({}, ctxWithAssistant(dir, "s1", "Should we use jsonl?"));
+    await handlers.before_agent_start?.(
+      { messageType: "user", prompt: "yes, use jsonl", systemPrompt: "base" },
+      ctxWithUserAndAssistant(dir, "s1", "yes, use jsonl", "Should we use jsonl?"),
+    );
+    await vi.waitFor(() => {
+      expect(runCaptureMock).toHaveBeenCalledTimes(1);
+    });
+    expect((runCaptureMock.mock.calls[0] as unknown[])[2]).toBe("yes, use jsonl");
+  });
+
+  it("custom-shape event (messageType 'custom', NO prompt key) → no capture", async () => {
+    writeModeSettings("background");
+    const { pi, handlers } = createMockPi();
+    decisionsExtension(pi);
+    await handlers.session_start?.({}, ctxWithAssistant(dir, "s1", "Should we use jsonl?"));
+    await handlers.before_agent_start?.(
+      { messageType: "custom", message: { customType: "fy:turn", data: {} }, systemPrompt: "base" },
+      ctxWithAssistant(dir, "s1", "Should we use jsonl?"),
+    );
+    // Give the async drain a chance to (wrongly) pick the item up before asserting.
+    await new Promise((r) => {
+      setTimeout(r, 0);
+    });
+    expect(runCaptureMock).not.toHaveBeenCalled();
   });
 });
 

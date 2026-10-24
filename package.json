@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-user-decisions",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Captures user decisions and re-injects them into the system prompt after compaction and into subagents, so the agent never forgets a decision you made.",
   "type": "module",
   "license": "MIT",

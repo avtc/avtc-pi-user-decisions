@@ -419,13 +419,15 @@ export default function decisionsExtension(pi: ExtensionAPI): void {
 
   // --- Auto-catch pipeline ---
   // Free-text turns: capture on before_agent_start when the user's prompt is settled.
-  // The user reply is event.prompt directly; aUQ answers are handled separately by the
-  // tool_result handler above.
+  // The user reply is event.prompt directly (pi >= 1.2.0 makes BeforeAgentStartEvent a
+  // union: "user" runs carry prompt/images, "custom" runs from sendMessage({triggerTurn})
+  // carry only message — the `in`-check narrows the union and is a no-op on pi 1.0.0 types);
+  // aUQ answers are handled separately by the tool_result handler above.
   // NOTE: registered BEFORE the injection handler so the injection result (systemPrompt)
   // is not overwritten by this handler's void return.
   pi.on("before_agent_start", async (event, ctx: ExtensionContext) => {
     if (!isBackgroundMode()) return; // hoisted gate — bail before any work in agent/none mode
-    const userReply = event.prompt;
+    const userReply = "prompt" in event ? event.prompt : undefined;
     if (!userReply || userReply.trim().length === 0) return;
     // Skip bash (!, !!) and slash commands — these don't go to the agent.
     if (userReply.trimStart().startsWith("!") || userReply.trimStart().startsWith("/")) return;
